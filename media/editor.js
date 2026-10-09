@@ -3221,6 +3221,68 @@ function svgToPngDataUrl(svgEl, scale) {
     });
 }
 
+/* KaTeX draws stretchy glyphs (the √ hook, arrows, braces) as a 400em-wide SVG
+   whose CSS box is only as wide as the glyph, with preserveAspectRatio "slice"
+   cropping the rest. html2canvas ignores that CSS sizing: it rasterizes the SVG
+   at its attribute size and squeezes the whole thing into the box, so the hook
+   shrinks to nothing and only the √ overline prints. In the capture clone, crop
+   each SVG's viewBox to the part actually visible and pin its size in px so the
+   image maps 1:1. Call after the clone's print CSS is in place (fill color). */
+function fixKatexSvgsForCapture(doc) {
+    var win = doc.defaultView || window;
+    doc.querySelectorAll('.katex svg').forEach(function (svg) {
+        try {
+            var box = svg.getBoundingClientRect();
+            if (!(box.width > 0 && box.height > 0)) return;
+            // Visible part = the SVG box clipped by any overflow-hidden ancestor
+            // inside the formula.
+            var vis = { l: box.left, t: box.top, r: box.right, b: box.bottom };
+            for (var a = svg.parentElement; a && !a.classList.contains('katex'); a = a.parentElement) {
+                var acs = win.getComputedStyle(a);
+                if (acs.overflowX === 'visible' && acs.overflowY === 'visible') continue;
+                var ar = a.getBoundingClientRect();
+                vis.l = Math.max(vis.l, ar.left); vis.t = Math.max(vis.t, ar.top);
+                vis.r = Math.min(vis.r, ar.right); vis.b = Math.min(vis.b, ar.bottom);
+            }
+            var vw = vis.r - vis.l, vh = vis.b - vis.t;
+            if (!(vw > 0 && vh > 0)) return;
+
+            var vb = (svg.getAttribute('viewBox') || '').trim().split(/[\s,]+/).map(Number);
+            if (vb.length === 4 && vb.every(isFinite) && vb[2] > 0 && vb[3] > 0) {
+                // Map the visible pixels back to viewBox units, per preserveAspectRatio.
+                var par = (svg.getAttribute('preserveAspectRatio') || 'xMidYMid meet').trim().split(/\s+/);
+                var align = par[0];
+                var sx = box.width / vb[2], sy = box.height / vb[3], ox = 0, oy = 0;
+                if (align !== 'none') {
+                    var sc = par[1] === 'slice' ? Math.max(sx, sy) : Math.min(sx, sy);
+                    sx = sy = sc;
+                    var freeX = box.width - vb[2] * sc, freeY = box.height - vb[3] * sc;
+                    ox = /xMid/.test(align) ? freeX / 2 : /xMax/.test(align) ? freeX : 0;
+                    oy = /YMid/.test(align) ? freeY / 2 : /YMax/.test(align) ? freeY : 0;
+                }
+                svg.setAttribute('viewBox', [
+                    vb[0] + (vis.l - box.left - ox) / sx,
+                    vb[1] + (vis.t - box.top - oy) / sy,
+                    vw / sx,
+                    vh / sy
+                ].join(' '));
+                svg.setAttribute('preserveAspectRatio', 'none');
+            }
+            var cs = win.getComputedStyle(svg);
+            if (cs.position === 'absolute') {
+                svg.style.left = ((parseFloat(cs.left) || 0) + (vis.l - box.left)) + 'px';
+                svg.style.top = ((parseFloat(cs.top) || 0) + (vis.t - box.top)) + 'px';
+            }
+            svg.setAttribute('width', vw);
+            svg.setAttribute('height', vh);
+            svg.style.width = vw + 'px';
+            svg.style.height = vh + 'px';
+            // The rasterized copy loses KaTeX's `fill: currentColor` CSS.
+            if (cs.fill && cs.fill !== 'none') svg.setAttribute('fill', cs.fill);
+        } catch (e) { /* leave this glyph as is */ }
+    });
+}
+
 /* Before a PDF capture, swap every rendered Mermaid diagram for a rasterized
    <img>. html2canvas can't render inline SVG (esp. foreignObject labels), so a
    diagram would otherwise print as a blank box. Re-renders each from source with
@@ -4149,6 +4211,10 @@ function _runPdfExport(userOpts) {
                         '#preview summary { font-weight:700 !important; }'
                     ].join('\n');
                     clonedDoc.head.appendChild(s);
+
+                    // √ hooks / math arrows: crop KaTeX's sliced SVGs (after the
+                    // print CSS above so the computed fill is the print color).
+                    fixKatexSvgsForCapture(clonedDoc);
                 }
             },
             jsPDF: { unit: 'mm', format: paperFormat, orientation: pageOrient },
