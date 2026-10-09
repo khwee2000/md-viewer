@@ -1,8 +1,8 @@
 {
   "name": "md-pretty-viewer",
-  "displayName": "MD Pretty Viewer",
-  "description": "Beautiful markdown preview · 13 color themes · LaTeX math · Mermaid diagrams · one-click PDF export · Korean typography bundled. The markdown editor that makes your writing look like art. — 마크다운을 작품처럼. 13가지 테마, LaTeX 수식, Mermaid 다이어그램, PDF 한 번 클릭, 한글 폰트 번들.",
-  "version": "1.0.42",
+  "displayName": "MD Pretty Viewer — Markdown Preview & PDF Export",
+  "description": "Markdown preview & one-click PDF export that actually looks good · 13 color themes · LaTeX math · Mermaid diagrams · Korean typography bundled · Claude Code chat links open straight into the pretty view. — 마크다운 프리뷰와 PDF 내보내기. 13가지 테마, LaTeX 수식, Mermaid 다이어그램, 한글 폰트 번들, Claude Code 문서 링크도 바로 예쁘게.",
+  "version": "1.0.43",
   "publisher": "innohi",
   "author": {
     "name": "INNO-HI Inc.",
@@ -50,14 +50,17 @@
     "한국어",
     "korean",
     "gfm",
-    "github"
+    "github",
+    "markdown preview",
+    "markdown pdf",
+    "claude code",
+    "ai docs"
   ],
   "engines": {
     "vscode": "^1.74.0"
   },
   "main": "./extension.js",
   "categories": [
-    "Other",
     "Visualization",
     "Formatters"
   ],

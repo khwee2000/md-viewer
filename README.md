@@ -16,6 +16,9 @@ Where your markdown becomes a masterpiece.
 Live preview that doesn't suck. 13 themes for every mood. PDF export that actually looks good.  
 LaTeX math · Mermaid · clipboard image paste · auto TOC · Korean-first typography — all bundled, all offline.
 
+Reading the plans and docs your AI agent writes? Claude Code chat links open straight into the pretty view.  
+Claude Code가 쓴 계획서와 문서도 채팅 링크를 누르면 바로 예쁘게 열립니다.
+
 <p><a href="https://marketplace.visualstudio.com/items?itemName=innohi.md-pretty-viewer"><b>Install →</b></a>&nbsp;&nbsp;·&nbsp;&nbsp;<a href="https://inno-hi-inc.github.io/md-viewer/">Homepage</a>&nbsp;&nbsp;·&nbsp;&nbsp;<a href="https://inno-hi-inc.github.io/md-viewer/demo.html">Live Demo</a>&nbsp;&nbsp;·&nbsp;&nbsp;<a href="https://github.com/INNO-HI-Inc/md-viewer/issues">Report Bug</a></p>
 
 <p><sub><a href="#-english"><b>English</b></a>&nbsp;&nbsp;·&nbsp;&nbsp;<a href="#-한국어"><b>한국어</b></a></sub></p>

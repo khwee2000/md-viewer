@@ -7,6 +7,17 @@
 
 
 
+## [1.0.43] - Unreleased
+
+### Added
+
+- **Open VSX 배포** — Cursor·Windsurf·VSCodium처럼 Open VSX를 쓰는 편집기에서도 확장 마켓에서 바로 설치할 수 있습니다.
+- **별점 요청(한 번만)** — 10번 이상 열고 처음 쓴 날로부터 3일이 지나면 한 번만 별점을 부탁합니다. 답하든 닫든 다시 묻지 않습니다. VS Code는 Marketplace, 다른 편집기는 Open VSX 리뷰 페이지로 연결됩니다.
+
+### Changed
+
+- **마켓플레이스 표시 이름·설명** — 검색에 걸리도록 "Markdown Preview & PDF Export"를 이름에 넣고, 카테고리에서 `Other`를 뺐습니다(Visualization·Formatters). 확장 ID(`innohi.md-pretty-viewer`)는 그대로라 기존 설치에는 영향이 없습니다.
+
 ## [1.0.42] - 2026-08-04
 
 PDF 변환을 다양한 상황에서 검증(넓은 표·긴 코드·수식·이미지·이모지 등)하고 고쳤습니다.

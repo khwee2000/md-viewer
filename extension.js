@@ -94,6 +94,7 @@ class MdPrettyEditorProvider {
 
     resolveCustomTextEditor(document, webviewPanel, _token) {
         const context = this.context;
+        maybeAskForRating(context);
         const webview = webviewPanel.webview;
         const uri = document.uri;
         const docDir = vscode.Uri.joinPath(uri, '..');
@@ -336,6 +337,44 @@ function showUpdateNotification(context) {
     }
 
     context.globalState.update('mdPrettyViewer.lastVersion', currentVersion);
+}
+
+// Ask for a rating exactly once, after the viewer has been used for a while.
+// Tab restore can open many editors at cold start, so the open count alone is
+// not enough — also require a few days since first use.
+const RATING_STATE_KEY = 'mdPrettyViewer.rating';
+const RATING_MIN_OPENS = 10;
+const RATING_MIN_DAYS = 3;
+
+function ratingUrl() {
+    // VS Code reads the Microsoft Marketplace; forks (Cursor, Windsurf,
+    // VSCodium…) install from Open VSX.
+    return vscode.env.appName.startsWith('Visual Studio Code')
+        ? 'https://marketplace.visualstudio.com/items?itemName=innohi.md-pretty-viewer&ssr=false#review-details'
+        : 'https://open-vsx.org/extension/innohi/md-pretty-viewer/reviews';
+}
+
+function maybeAskForRating(context) {
+    const now = Date.now();
+    const state = context.globalState.get(RATING_STATE_KEY, { opens: 0, firstUse: now, asked: false });
+    if (state.asked) return;
+    state.opens += 1;
+    const days = (now - state.firstUse) / 86400000;
+    const ready = state.opens >= RATING_MIN_OPENS && days >= RATING_MIN_DAYS;
+    if (ready) state.asked = true;
+    context.globalState.update(RATING_STATE_KEY, state);
+    if (!ready) return;
+
+    const ko = vscode.env.language.startsWith('ko');
+    const rate = ko ? '평가하기' : 'Rate';
+    vscode.window.showInformationMessage(
+        ko ? 'MD Pretty Viewer가 도움이 됐다면 별점을 남겨 주세요. 다른 사람이 찾는 데 큰 힘이 됩니다.'
+           : 'Enjoying MD Pretty Viewer? A quick rating helps others find it.',
+        rate,
+        ko ? '닫기' : 'Close'
+    ).then(selection => {
+        if (selection === rate) vscode.env.openExternal(vscode.Uri.parse(ratingUrl()));
+    });
 }
 
 function activate(context) {
